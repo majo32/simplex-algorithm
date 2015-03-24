@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package com.m32dn.simplex.tableaux;
+package com.m32dn.simplex.tableau;
 
 import com.m32dn.simplex.logger.SimplexLogger;
 
@@ -23,11 +23,14 @@ import com.m32dn.simplex.logger.SimplexLogger;
  *
  * @author majo32
  */
-public class NonCannonicalTableaux extends BaseTableaux {
+public class NonCannonicalTableau extends BaseTableau {
 
     /**
-     * Input matrix format example max 4a + 3b -3c -5d constraint 1a + 3c = 45
-     * constraint 4b - 7d = 21 constraint a + b +c - 7d = 3
+     * Input matrix format example 
+     * min 4a + 3b -3c -5d 
+     * constraint 1a + 3c = 45
+     * constraint 4b - 7d = 21 
+     * constraint a + b +c - 7d = 3
      *
      * input matrix: 
      * 4 3 -3 -5 0 
@@ -35,53 +38,62 @@ public class NonCannonicalTableaux extends BaseTableaux {
      * 0 4 0 -7 21 
      * 1 1 1 -7 3
      *
-     * If &lt= OR &gt= in constraints use slack variables to get equal form
+     * If &lt=; OR &gt=; in constraints use slack variables to get equal form
      *
      * @param constraints
      */
-    public NonCannonicalTableaux(double[]... constraints) {
-        super(constraints[0].length, constraints);
+    public NonCannonicalTableau(double[]... constraints) {
+        super(constraints[0].length, true, constraints);
         log();
     }
 
     /**
-     * Input matrix format example max 4a + 3b -3c -5d constraint 1a + 3c = 45
-     * constraint 4b - 7d = 21 constraint a + b +c - 7d = 3 varCount: 5
-     * maxFunction: 
+     * Input matrix format example 
+     * min 4a + 3b -3c -5d 
+     * constraint 1a + 3c = 45
+     * constraint 4b - 7d = 21 
+     * constraint a + b +c - 7d = 3
+     * 
+     * minFunction: 
      * 4 3 -3 -5 0 
      * constraints: 
      * 1 0 3 0 45
      * 0 4 0 -7 21 
      * 1 1 1 -7 3
      *
-     * If &lt= OR &gt= in constraints use slack variables to get equal form
+     * If &lt;= OR &gt;= in constraints use slack variables to get equal form
      *
-     * @param maxFunction
+     * @param minFunction
      * @param constraints
      */
-    public NonCannonicalTableaux(double[] maxFunction, double[]... constraints) {
-        super(maxFunction.length, maxFunction, constraints);
+    public NonCannonicalTableau(double[] minFunction, double[]... constraints) {
+        super(minFunction.length, true, minFunction, constraints);
         log();
     }
 
     /**
-     * Input matrix format example max 4a + 3b -3c -5d constraint 1a + 3c = 45
-     * constraint 4b - 7d = 21 constraint a + b +c - 7d = 3 varCount: 5
-     * maxFunction: 4 3 -3 -5 0 
+     * Input matrix format example 
+     * min 4a + 3b -3c -5d 
+     * constraint 1a + 3c = 45
+     * constraint 4b - 7d = 21 
+     * constraint a + b +c - 7d = 3 
+     * 
+     * minFunction: 
+     * 4 3 -3 -5 0 
      * constraints: 
      * 1 0 3 0 45 
      * 0 4 0 -7 21 
      * 1 1 1 -7 3
      * columnsCount:
      * 5
-     * If &lt= OR &gt= in constraints use slack variables to get equal form
+     * If &lt;= OR &gt;= in constraints use slack variables to get equal form
      *
      * @param columnsCount
-     * @param maxFunction
+     * @param minFunction
      * @param constraints
      */
-    public NonCannonicalTableaux(int columnsCount, double[] maxFunction, double[]... constraints) {
-        super(columnsCount, maxFunction, constraints);
+    public NonCannonicalTableau(int columnsCount, double[] minFunction, double[]... constraints) {
+        super(columnsCount, true, minFunction, constraints);
         log();
     }
     
@@ -89,5 +101,4 @@ public class NonCannonicalTableaux extends BaseTableaux {
         SimplexLogger.log("Simple corrections:");
         SimplexLogger.log(this.getPrintable());
     }
-
 }

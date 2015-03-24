@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package com.m32dn.simplex.tableaux;
+package com.m32dn.simplex.tableau;
 
 import com.m32dn.simplex.algorithm.SimplexStrategy;
 import com.m32dn.simplex.algorithm.SimplexAlgorithm;
@@ -26,30 +26,30 @@ import com.m32dn.simplex.logger.SimplexLogger;
  *
  * @author majo32
  */
-public class CannonicalTableaux extends BaseTableaux {
+public class CannonicalTableau extends BaseTableau {
 
     private final SimplexStrategy algo;
     private boolean optimized = false;
     private boolean unbounded = false;
     private SimplexException optimizationException = null;
 
-    protected CannonicalTableaux(int varCount, double[]... constraints) throws SimplexException {
-        super(varCount, constraints);
+    protected CannonicalTableau(int varCount, double[]... constraints) throws SimplexException {
+        super(varCount, false,  constraints);
         if (!this.allRowsInBase()) {
             throw new SimplexException("Ooops this should be cannonical!!");
         }
         this.algo = new SimplexAlgorithm(this);
     }
 
-    protected CannonicalTableaux(int varCount, double[] minFunction, double[]... constraints) throws SimplexException {
-        super(varCount, minFunction, constraints);
+    protected CannonicalTableau(int varCount, double[] minFunction, double[]... constraints) throws SimplexException {
+        super(varCount, false, minFunction, constraints);
         if (!this.allRowsInBase()) {
             throw new SimplexException("Ooops this should be cannonical!!");
         }
         this.algo = new SimplexAlgorithm(this);
     }
 
-    public CannonicalTableaux optimize() throws SimplexException {
+    public CannonicalTableau optimize() throws SimplexException {
         try {
             SimplexLogger.log("Start optimizing:");
             this.unbounded = !this.algo.optimize();
@@ -76,7 +76,7 @@ public class CannonicalTableaux extends BaseTableaux {
     public boolean isOptimal(){
         return !unbounded;
     }
-    public double getMaxFunctionResult(){
+    public double getMinFunctionResult(){
         return this.rows[0][this.getBIndex()];
     }
 

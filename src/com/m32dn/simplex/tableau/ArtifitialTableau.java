@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package com.m32dn.simplex.tableaux;
+package com.m32dn.simplex.tableau;
 
 import com.m32dn.simplex.exception.SimplexException;
 import com.m32dn.simplex.logger.SimplexLogger;
@@ -25,23 +25,20 @@ import java.util.Arrays;
  *
  * @author majo32
  */
-class ArtifitialTableaux extends CannonicalTableaux {
+class ArtifitialTableau extends CannonicalTableau {
 
     private final int artifitialVarCount;
 
-    protected ArtifitialTableaux(int artifitialVarCount, int varCount, double[] minFunction, double[]... constraints) throws SimplexException {
+    protected ArtifitialTableau(int artifitialVarCount, int varCount, double[] minFunction, double[]... constraints) throws SimplexException {
         super(varCount, minFunction, constraints);
         this.artifitialVarCount = artifitialVarCount;
     }
 
-    public CannonicalTableaux renderCannonicalFormWithFunction(double[] minFunction) throws SimplexException {
+    public CannonicalTableau renderCannonicalFormWithFunction(double[] minFunction) throws SimplexException {
         this.optimize();
         if (!this.allRowsInBase()) {
             throw new SimplexException("Ooops not basic result after optimization!!");
         }
-        /*if(this.rows[0][this.getBIndex()] != 0){
-            throw new SimplexException("Artifitial min-function result is not zero !! <"+ this.rows[0][this.getBIndex()] +">");
-        }*/
         for (int i : this.inBase) {
             if (i != -1) {
                 if (i >= (this.variableCount - this.artifitialVarCount) && i < this.variableCount) {
@@ -55,10 +52,9 @@ class ArtifitialTableaux extends CannonicalTableaux {
             newRows[i][this.columnsCount - this.artifitialVarCount -1] = this.rows[i+1][this.getBIndex()];
         }
         SimplexLogger.log("Cannonical instance:");
-        CannonicalTableaux c = new CannonicalTableaux(this.columnsCount - this.artifitialVarCount, minFunction, newRows);
+        CannonicalTableau c = new CannonicalTableau(this.columnsCount - this.artifitialVarCount, minFunction, newRows);
         SimplexLogger.log("Simple corrections:");
         SimplexLogger.log(c.getPrintable());
         return c;
     }
-
 }

@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package com.m32dn.simplex.tableaux;
+package com.m32dn.simplex.tableau;
 
 import com.m32dn.simplex.exception.SimplexException;
 import com.m32dn.simplex.logger.SimplexLogger;
@@ -26,7 +26,7 @@ import java.math.BigDecimal;
  * @author majo32
  *
  */
-abstract class BaseTableaux {
+abstract class BaseTableau {
 
     protected int variableCount;
 
@@ -39,70 +39,78 @@ abstract class BaseTableaux {
 
     protected int[] inBase;
     protected int inBaseCount = 0;
-    
-    
-    
-    public BaseTableaux(int columnsCount, double[] maxFunction, double[]... constraints) {
+
+    public BaseTableau(int columnsCount, boolean inverse, double[] minFunction, double[]... constraints) {
         this.variableCount = columnsCount - 1;
         this.columnsCount = columnsCount;
         this.rowsCount = constraints.length + 1;
 
         this.rows = new double[this.rowsCount][columnsCount];
         this.defRows = new double[this.rowsCount][columnsCount];
-
+        
         for (int i = 0; i < this.rowsCount; i++) {
             if (i == 0) {
-                System.arraycopy(maxFunction, 0, this.rows[i], 0, this.columnsCount);
+                System.arraycopy(minFunction, 0, this.rows[i], 0, this.columnsCount);
             } else {
                 System.arraycopy(constraints[i - 1], 0, this.rows[i], 0, this.columnsCount);
             }
         }
         for (int i = 0; i < this.rowsCount; i++) {
             if (i == 0) {
-                System.arraycopy(maxFunction, 0, this.defRows[i], 0, this.columnsCount);
+                System.arraycopy(minFunction, 0, this.defRows[i], 0, this.columnsCount);
             } else {
                 System.arraycopy(constraints[i - 1], 0, this.defRows[i], 0, this.columnsCount);
             }
 
         }
-        this.startupInit();
+        this.startupInit(inverse);
         this.recount(true);
         this.removeNegativeResults();
     }
-    
-    public BaseTableaux(int columnsCount, double[]... constraints) {
+
+    public BaseTableau(int columnsCount, boolean inverse, double[]... constraints) {
         this.variableCount = columnsCount - 1;
         this.columnsCount = columnsCount;
         this.rowsCount = constraints.length;
 
         this.rows = new double[this.rowsCount][columnsCount];
         this.defRows = new double[this.rowsCount][columnsCount];
-
+        
         for (int i = 0; i < this.rowsCount; i++) {
             System.arraycopy(constraints[i], 0, this.rows[i], 0, this.columnsCount);
         }
         for (int i = 0; i < this.rowsCount; i++) {
             System.arraycopy(constraints[i], 0, this.defRows[i], 0, this.columnsCount);
         }
-        this.startupInit();
+        this.startupInit(inverse);
         this.recount(true);
         this.removeNegativeResults();
     }
-    
-    private void removeNegativeResults(){
+
+    protected void inverseDoubleArray(double[] arr) {
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = -arr[i];
+        }
+    }
+
+    private void removeNegativeResults() {
         for (int i = 1; i < this.rowsCount; i++) {
-            if(this.rows[i][this.getBIndex()] < 0){
+            if (this.rows[i][this.getBIndex()] < 0) {
                 this.multipleRow(i, -1);
             }
         }
     }
-    private void startupInit(){
+
+    private void startupInit(boolean inverse) {
+        if(inverse){
+            this.inverseDoubleArray(this.rows[0]);
+        }
         SimplexLogger.log("New instance:");
         SimplexLogger.log(this.getPrintable());
     }
     
     protected final void recount(boolean force) {
-        
+
         this.inBase = new int[this.rowsCount];
         this.inBaseCount = 0;
         int res;
@@ -158,7 +166,7 @@ abstract class BaseTableaux {
         for (int i = 0; i < this.columnsCount; i++) {
             this.rows[destRowId][i] = this.rows[destRowId][i] - (this.rows[srcRowId][i] * multiplier);
             //if (i == variable) {
-                //this.constraints[destRowId][i] = 0;
+            //this.constraints[destRowId][i] = 0;
             //}
         }
     }
@@ -185,7 +193,7 @@ abstract class BaseTableaux {
         return this.variableCount;
     }
 
-    private ArtifitialTableaux prepareArtifitialTableaux() throws SimplexException {
+    private ArtifitialTableau prepareArtifitialTableaux() throws SimplexException {
         int additive = this.rowsCount - 1 - this.inBaseCount;
         int newColumnsCount = this.variableCount + additive + 1;
         int it = this.variableCount;
@@ -213,23 +221,23 @@ abstract class BaseTableaux {
             newFunction[j] = -1;
         }
         newFunction[newColumnsCount - 1] = this.rows[0][this.variableCount];
-        return new ArtifitialTableaux(additive, newColumnsCount, newFunction, newConstraints);
+        return new ArtifitialTableau(additive, newColumnsCount, newFunction, newConstraints);
     }
 
     public boolean allRowsInBase() {
         return this.inBaseCount == this.rowsCount - 1;
     }
 
-    private CannonicalTableaux copyCannonicalTableaux() throws SimplexException {
-        CannonicalTableaux c = new CannonicalTableaux(this.columnsCount, this.rows);
+    private CannonicalTableau copyCannonicalTableaux() throws SimplexException {
+        CannonicalTableau c = new CannonicalTableau(this.columnsCount, this.rows);
         return c;
     }
 
-    public CannonicalTableaux getCannonical() throws SimplexException {
+    public CannonicalTableau getCannonical() throws SimplexException {
         SimplexLogger.log("Start rendering canonical form:");
         if (!this.allRowsInBase()) {
             SimplexLogger.log("Need artifitial variables:");
-            ArtifitialTableaux t = this.prepareArtifitialTableaux();
+            ArtifitialTableau t = this.prepareArtifitialTableaux();
             SimplexLogger.log(t.getPrintable());
             return t.renderCannonicalFormWithFunction(this.rows[0]);
         } else {

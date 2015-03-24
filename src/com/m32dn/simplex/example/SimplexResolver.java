@@ -20,7 +20,7 @@ package com.m32dn.simplex.example;
 import com.m32dn.simplex.exception.SimplexException;
 import com.m32dn.simplex.io.SimplexFileReader;
 import com.m32dn.simplex.logger.SimplexLogger;
-import com.m32dn.simplex.tableaux.CannonicalTableaux;
+import com.m32dn.simplex.tableau.CannonicalTableau;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -36,7 +36,7 @@ public class SimplexResolver {
             SimplexLogger.enable();
             
             SimplexFileReader r = new SimplexFileReader("input.txt");
-            CannonicalTableaux t = r.getTableaux().getCannonical();
+            CannonicalTableau t = r.getTableaux().getCannonical();
             double [] res = t.optimize().getSolution();
             
             System.out.println(SimplexLogger.getLoggedText());
@@ -45,7 +45,7 @@ public class SimplexResolver {
             System.out.println("RESULT:");
             System.out.println("Optimal: " + (t.isUnbounded() ? "No (unbounded)" : "OK"));
             System.out.println(Arrays.toString(res));
-            System.out.println("Function result: " + t.getMaxFunctionResult());
+            System.out.println("Function result: " + t.getMinFunctionResult());
             
         } catch (SimplexException | IOException ex) {
             Logger.getLogger(SimplexResolver.class.getName()).log(Level.SEVERE, null, ex);

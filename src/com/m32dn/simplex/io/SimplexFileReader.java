@@ -17,7 +17,7 @@
  */
 package com.m32dn.simplex.io;
 
-import com.m32dn.simplex.tableaux.NonCannonicalTableaux;
+import com.m32dn.simplex.tableau.NonCannonicalTableau;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -46,21 +46,27 @@ public class SimplexFileReader {
             String line = file.readLine();
             String[] parts;
             while (line != null) {
-                
-                parts = line.split(" ");
-                arr.add(new ArrayList());
-                for (String p : parts) {
-                    if("".equals(p)){
-                        continue;
+                if (!"".equals(line.trim())) {
+                    parts = line.split(" ");
+                    arr.add(new ArrayList());
+                    for (String p : parts) {
+                        if ("".equals(p)) {
+                            continue;
+                        }
+                        arr.get(arr.size() - 1).add(Double.parseDouble(p));
                     }
-                    arr.get(arr.size() - 1).add(Double.parseDouble(p));
                 }
                 line = file.readLine();
             }
             this.rows = new double[arr.size()][arr.get(0).size()];
-            for (int i = 0; i< arr.size() ;i++) {
-                for (int j = 0; j< arr.get(0).size() ;j++) {
-                    this.rows[i][j] = arr.get(i).get(j);
+            for (int i = 0; i < arr.size(); i++) {
+                for (int j = 0; j < arr.get(0).size(); j++) {
+                    if (j < arr.get(i).size()) {
+                        this.rows[i][j] = arr.get(i).get(j);
+                    } else {
+                        this.rows[i][j] = 0;
+                    }
+
                 }
             }
         } finally {
@@ -68,8 +74,8 @@ public class SimplexFileReader {
         }
     }
 
-    public NonCannonicalTableaux getTableaux() {
-        NonCannonicalTableaux t = new NonCannonicalTableaux(this.rows);
+    public NonCannonicalTableau getTableaux() {
+        NonCannonicalTableau t = new NonCannonicalTableau(this.rows);
         return t;
     }
 

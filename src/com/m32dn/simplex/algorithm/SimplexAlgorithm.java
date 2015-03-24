@@ -18,7 +18,7 @@
 package com.m32dn.simplex.algorithm;
 
 import com.m32dn.simplex.exception.SimplexException;
-import com.m32dn.simplex.tableaux.CannonicalTableaux;
+import com.m32dn.simplex.tableau.CannonicalTableau;
 
 /**
  *
@@ -26,10 +26,10 @@ import com.m32dn.simplex.tableaux.CannonicalTableaux;
  */
 public class SimplexAlgorithm implements SimplexStrategy {
 
-    private final CannonicalTableaux table;
+    private final CannonicalTableau table;
     private static final int __MAX_LOOPS = 10000;
 
-    public SimplexAlgorithm(CannonicalTableaux table) {
+    public SimplexAlgorithm(CannonicalTableau table) {
         this.table = table;
     }
 
