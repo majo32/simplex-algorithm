@@ -29,16 +29,13 @@ import java.math.BigDecimal;
 abstract class BaseTableau {
 
     protected int variableCount;
-
     protected int columnsCount;
     protected int rowsCount;
 
     protected double[][] rows;
 
-    protected double[][] defRows;
-
-    protected int[] inBase;
-    protected int inBaseCount = 0;
+    protected int[] base;
+    protected int basicVariablesCount = 0;
 
     public BaseTableau(int columnsCount, boolean inverse, double[] minFunction, double[]... constraints) {
         this.variableCount = columnsCount - 1;
@@ -46,22 +43,12 @@ abstract class BaseTableau {
         this.rowsCount = constraints.length + 1;
 
         this.rows = new double[this.rowsCount][columnsCount];
-        this.defRows = new double[this.rowsCount][columnsCount];
-        
         for (int i = 0; i < this.rowsCount; i++) {
             if (i == 0) {
                 System.arraycopy(minFunction, 0, this.rows[i], 0, this.columnsCount);
             } else {
                 System.arraycopy(constraints[i - 1], 0, this.rows[i], 0, this.columnsCount);
             }
-        }
-        for (int i = 0; i < this.rowsCount; i++) {
-            if (i == 0) {
-                System.arraycopy(minFunction, 0, this.defRows[i], 0, this.columnsCount);
-            } else {
-                System.arraycopy(constraints[i - 1], 0, this.defRows[i], 0, this.columnsCount);
-            }
-
         }
         this.startupInit(inverse);
         this.recount(true);
@@ -74,13 +61,9 @@ abstract class BaseTableau {
         this.rowsCount = constraints.length;
 
         this.rows = new double[this.rowsCount][columnsCount];
-        this.defRows = new double[this.rowsCount][columnsCount];
-        
+
         for (int i = 0; i < this.rowsCount; i++) {
             System.arraycopy(constraints[i], 0, this.rows[i], 0, this.columnsCount);
-        }
-        for (int i = 0; i < this.rowsCount; i++) {
-            System.arraycopy(constraints[i], 0, this.defRows[i], 0, this.columnsCount);
         }
         this.startupInit(inverse);
         this.recount(true);
@@ -96,40 +79,40 @@ abstract class BaseTableau {
     private void removeNegativeResults() {
         for (int i = 1; i < this.rowsCount; i++) {
             if (this.rows[i][this.getBIndex()] < 0) {
-                this.multipleRow(i, -1);
+                this.multiplyRow(i, -1);
             }
         }
     }
 
     private void startupInit(boolean inverse) {
-        if(inverse){
+        if (inverse) {
             this.inverseDoubleArray(this.rows[0]);
         }
         SimplexLogger.log("New instance:");
         SimplexLogger.log(this.getPrintable());
     }
-    
+
     protected final void recount(boolean force) {
 
-        this.inBase = new int[this.rowsCount];
-        this.inBaseCount = 0;
+        this.base = new int[this.rowsCount];
+        this.basicVariablesCount = 0;
         int res;
         for (int i = 0; i < this.rowsCount; i++) {
-            inBase[i] = -1;
+            base[i] = -1;
         }
         for (int i = 0; i < this.variableCount; i++) {
 
             res = this.isBasicVariable(i, force);
             if (res >= 0) {
-                inBase[res] = i;
+                base[res] = i;
                 if (force) {
                     this.ensureBaseVariable(i, res);
                 }
             }
         }
         for (int i = 0; i < this.rowsCount; i++) {
-            if (inBase[i] >= 0) {
-                this.inBaseCount++;
+            if (base[i] >= 0) {
+                this.basicVariablesCount++;
             }
         }
     }
@@ -155,7 +138,7 @@ abstract class BaseTableau {
         }
     }
 
-    public void multipleRow(int rowId, double multiplier) {
+    public void multiplyRow(int rowId, double multiplier) {
         for (int i = 0; i < this.columnsCount; i++) {
             this.rows[rowId][i] = this.rows[rowId][i] * multiplier;
         }
@@ -172,7 +155,7 @@ abstract class BaseTableau {
     }
 
     public void ensureBaseVariable(int var, int row) {
-        this.multipleRow(row, 1 / this.rows[row][var]);
+        this.multiplyRow(row, 1 / this.rows[row][var]);
         //this.constraints[row][var] = 1;
         this.forceZeroOnRow(row, 0, var);
     }
@@ -193,8 +176,8 @@ abstract class BaseTableau {
         return this.variableCount;
     }
 
-    private ArtifitialTableau prepareArtifitialTableaux() throws SimplexException {
-        int additive = this.rowsCount - 1 - this.inBaseCount;
+    private ArtifitialTableau prepareArtifitialTableau() throws SimplexException {
+        int additive = this.rowsCount - 1 - this.basicVariablesCount;
         int newColumnsCount = this.variableCount + additive + 1;
         int it = this.variableCount;
         double[][] newConstraints = new double[this.rowsCount - 1][newColumnsCount];
@@ -207,7 +190,7 @@ abstract class BaseTableau {
             for (int j = this.variableCount; j < newColumnsCount - 1; j++) {
                 newConstraints[i][j] = 0;
             }
-            if (this.inBase[i + 1] == -1) {
+            if (this.base[i + 1] == -1) {
                 newConstraints[i][it] = 1;
                 it++;
             }
@@ -225,7 +208,7 @@ abstract class BaseTableau {
     }
 
     public boolean allRowsInBase() {
-        return this.inBaseCount == this.rowsCount - 1;
+        return this.basicVariablesCount == this.rowsCount - 1;
     }
 
     private CannonicalTableau copyCannonicalTableaux() throws SimplexException {
@@ -237,7 +220,7 @@ abstract class BaseTableau {
         SimplexLogger.log("Start rendering canonical form:");
         if (!this.allRowsInBase()) {
             SimplexLogger.log("Need artifitial variables:");
-            ArtifitialTableau t = this.prepareArtifitialTableaux();
+            ArtifitialTableau t = this.prepareArtifitialTableau();
             SimplexLogger.log(t.getPrintable());
             return t.renderCannonicalFormWithFunction(this.rows[0]);
         } else {
@@ -251,7 +234,7 @@ abstract class BaseTableau {
         String ANSI_RED = "\u001B[31m";
         String ANSI_BLUE = "\u001B[34m";
         StringBuilder b = new StringBuilder();
-        b.append("Tableaux:\n");
+        b.append("Tableau:\n");
         for (int i = 0; i < this.rowsCount; i++) {
             if (i == 0) {
                 if (colorize) {

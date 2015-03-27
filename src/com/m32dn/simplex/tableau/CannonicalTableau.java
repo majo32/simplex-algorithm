@@ -86,8 +86,8 @@ public class CannonicalTableau extends BaseTableau {
             res[i] = 0;
         }
         for (int i = 1; i < this.rowsCount; i++) {
-            if (this.inBase[i] >= 0) {
-                res[this.inBase[i]] = this.rows[i][this.getBIndex()];
+            if (this.base[i] >= 0) {
+                res[this.base[i]] = this.rows[i][this.getBIndex()];
             }
         }
         return res;

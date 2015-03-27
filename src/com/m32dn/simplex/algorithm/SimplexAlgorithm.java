@@ -68,7 +68,7 @@ public class SimplexAlgorithm implements SimplexStrategy {
     }
 
     private void optimizeStep(int var, int row) {
-        table.multipleRow(row, 1 / table.get(var, row));
+        table.multiplyRow(row, 1 / table.get(var, row));
         for (int i = 0; i < table.getRowsCount(); i++) {
             if (i != row) {
                 table.forceZeroOnRow(row, i, var);

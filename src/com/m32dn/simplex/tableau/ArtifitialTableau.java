@@ -39,7 +39,7 @@ class ArtifitialTableau extends CannonicalTableau {
         if (!this.allRowsInBase()) {
             throw new SimplexException("Ooops not basic result after optimization!!");
         }
-        for (int i : this.inBase) {
+        for (int i : this.base) {
             if (i != -1) {
                 if (i >= (this.variableCount - this.artifitialVarCount) && i < this.variableCount) {
                     throw new SimplexException("Artifitial variable is not zero! <" + Arrays.toString(this.getSolution())  + ">");
